@@ -1,12 +1,13 @@
+def imageName = 'mlabouardy/movies-parser'
 node('workers'){
     stage('Checkout'){
         checkout scm
     }
-}
-
-def commitID() {
-    sh 'git rev-parse HEAD > .git/commitID'
-    def commitID = readFile('.git/commitID').trim()
-    sh 'rm .git/commitID'
-    commitID
+ 
+    stage('Quality Tests'){
+       def imageTest= docker.build("${imageName}-test", "-f Dockerfile.test .")
+        imageTest.inside{
+            sh 'golint'
+        }
+    }
 }
